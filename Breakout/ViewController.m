@@ -11,7 +11,7 @@
 #import "BallView.h"
 #import "BlockView.h"
 
-@interface ViewController () <UICollisionBehaviorDelegate>
+@interface ViewController () <UICollisionBehaviorDelegate, UIAlertViewDelegate>
 {
     
     __weak IBOutlet PaddleView *paddleView;
@@ -25,6 +25,7 @@
     UICollisionBehavior *collisionBehavior;
     NSMutableArray *unstruckBlocks;
     BOOL gameHasBegun;
+    UIAlertView *alert;
 }
 
 @end
@@ -39,9 +40,12 @@
     [self drawBlocks];
     
     gameHasBegun = NO;
+    // Set ball image
     NSString *ballImagePath = [[NSBundle mainBundle] pathForResource:@"ball" ofType:@"png" inDirectory:@"pongAssets"];
     ballView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageWithContentsOfFile:ballImagePath]];
     [ballView setOpaque:NO];
+    
+    // Set paddle image
     NSString *paddleImagePath = [[NSBundle mainBundle] pathForResource:@"paddle" ofType:@"png" inDirectory:@"pongAssets"];
     paddleView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageWithContentsOfFile:paddleImagePath]];
     [paddleView setOpaque:NO];
@@ -59,10 +63,11 @@
     
     paddleDynamicBehavior.allowsRotation = NO;
     paddleDynamicBehavior.density = 100000000;
+    paddleDynamicBehavior.elasticity = 1.0;
     
     [dynamicAnimator addBehavior:paddleDynamicBehavior];
     
-    ballDynamicBehavior.allowsRotation = YES;
+    ballDynamicBehavior.allowsRotation = NO;
     ballDynamicBehavior.elasticity = 1.0;
     ballDynamicBehavior.friction = 0.0;
     ballDynamicBehavior.resistance = 0.0;
@@ -70,7 +75,7 @@
     [dynamicAnimator addBehavior:ballDynamicBehavior];
     
     blockDynamicBehavior.allowsRotation = NO;
-    blockDynamicBehavior.elasticity = 0.0;
+    blockDynamicBehavior.elasticity = 1.0;
     blockDynamicBehavior.friction = 0.0;
     blockDynamicBehavior.resistance = 0.0;
     blockDynamicBehavior.density = 100000000;
@@ -92,7 +97,7 @@
 -(void)drawBlocks
 {
     for (int x = 0; x < 6; x++) {
-        for (int y = 0 ; y < 6; y++) {
+        for (int y = 0 ; y < 1; y++) {
             BlockView *tempBlockView = [[BlockView alloc] initWithFrame:CGRectMake( ((x * 40) + 40), ((y * 15) + 40), 40, 15)];
             tempBlockView.backgroundColor = [UIColor blueColor];
             tempBlockView.layer.borderColor = [UIColor blackColor].CGColor;
@@ -118,10 +123,12 @@
     
     paddleDynamicBehavior.allowsRotation = NO;
     paddleDynamicBehavior.density = 100000000;
+    paddleDynamicBehavior.elasticity = 1.0;
+    paddleDynamicBehavior.resistance = 0.0;
     
     [dynamicAnimator addBehavior:paddleDynamicBehavior];
     
-    ballDynamicBehavior.allowsRotation = YES;
+    ballDynamicBehavior.allowsRotation = NO;
     ballDynamicBehavior.elasticity = 1.0;
     ballDynamicBehavior.friction = 0.0;
     ballDynamicBehavior.resistance = 0.0;
@@ -129,7 +136,7 @@
     [dynamicAnimator addBehavior:ballDynamicBehavior];
     
     blockDynamicBehavior.allowsRotation = NO;
-    blockDynamicBehavior.elasticity = 0.0;
+    blockDynamicBehavior.elasticity = 1.0;
     blockDynamicBehavior.friction = 0.0;
     blockDynamicBehavior.resistance = 0.0;
     blockDynamicBehavior.density = 100000000;
@@ -150,7 +157,8 @@
 
 - (IBAction)dragPaddle:(UIPanGestureRecognizer *)panGestureRecognizer {
     
-    if (gameHasBegun == NO) {
+    if (gameHasBegun == NO)
+    {
         gameHasBegun = YES;
         pushBehavior.active = YES;
         [dynamicAnimator addBehavior:pushBehavior];
@@ -163,7 +171,8 @@
 
 - (void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier atPoint:(CGPoint)p
 {
-    if (p.y > 560) {
+    if (p.y > 560)
+    {
         ballView.center = self.view.center;
         [dynamicAnimator updateItemUsingCurrentState:ballView];
         [self restartLife];
@@ -172,18 +181,51 @@
 
 -(void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item1 withItem:(id<UIDynamicItem>)item2 atPoint:(CGPoint)p
 {
-    if ([item1 isKindOfClass:[BallView class]] && [item2 isKindOfClass:[BlockView class]]) {
+    // Check to see if items colliding are of BallView and BlockView classes
+    if ([item1 isKindOfClass:[BallView class]] && [item2 isKindOfClass:[BlockView class]])
+    {
         NSLog(@"Ball and Block Collided");
+        
+        // Grabs the exact item (at the same memory address) colliding with the ball from the UnstruckBlocks array and removes it from the super view
         [[unstruckBlocks objectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]] removeFromSuperview];
+        
+        // Grabs the exact item (at the same memory address) colliding with the ball and removes it from collisionBehavior
         [collisionBehavior removeItem:[unstruckBlocks objectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]]];
+        
+        // Grabs the exact item (at the same memory address) colliding with the ball and removes it from the unstruckBlocks array
         [unstruckBlocks removeObjectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]];
         
+        // Check to see if unstruckBlocks is empty. If so, call method shouldStartAgain
+        [self shouldStartAgain:unstruckBlocks];
     }
 
-    if ([item1 isKindOfClass:[PaddleView class]] && [item2 isKindOfClass:[BallView class]]) {
+    if ([item1 isKindOfClass:[PaddleView class]] && [item2 isKindOfClass:[BallView class]])
+    {
         NSLog(@"%f", [ballDynamicBehavior angularVelocityForItem:ballView]);
     }
-    
+}
+
+-(BOOL)shouldStartAgain:(NSArray *)NSArray
+{
+    if (NSArray.count == 0)
+    {
+        [dynamicAnimator removeAllBehaviors];
+        alert = [[UIAlertView alloc] initWithTitle:@"Congratulations!" message:@"Winner Winner Chicken Dinner!" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Play Again", nil];
+        [alert show];
+        return YES;
+    }
+    return NO;
+}
+
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 1) {
+        ballView.center = self.view.center;
+        [dynamicAnimator updateItemUsingCurrentState:ballView];
+        [self drawBlocks];
+        [self restartLife];
+    }
 }
 
 @end
