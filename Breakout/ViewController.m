@@ -11,12 +11,11 @@
 #import "BallView.h"
 #import "BlockView.h"
 
-@interface ViewController ()
+@interface ViewController () <UICollisionBehaviorDelegate>
 {
     
     __weak IBOutlet PaddleView *paddleView;
     __weak IBOutlet BallView *ballView;
-    __weak IBOutlet BlockView *blockView;
     
     UIDynamicAnimator *dynamicAnimator;
     UIDynamicItemBehavior *paddleDynamicBehavior;
@@ -24,6 +23,8 @@
     UIDynamicItemBehavior *blockDynamicBehavior;
     UIPushBehavior *pushBehavior;
     UICollisionBehavior *collisionBehavior;
+    NSMutableArray *unstruckBlocks;
+    BOOL gameHasBegun;
 }
 
 @end
@@ -33,20 +34,35 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    unstruckBlocks = [NSMutableArray array];
+    [self drawBlocks];
+    
+    gameHasBegun = NO;
+    NSString *ballImagePath = [[NSBundle mainBundle] pathForResource:@"ball" ofType:@"png" inDirectory:@"pongAssets"];
+    ballView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageWithContentsOfFile:ballImagePath]];
+    [ballView setOpaque:NO];
+    NSString *paddleImagePath = [[NSBundle mainBundle] pathForResource:@"paddle" ofType:@"png" inDirectory:@"pongAssets"];
+    paddleView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageWithContentsOfFile:paddleImagePath]];
+    [paddleView setOpaque:NO];
+    
     dynamicAnimator = [[UIDynamicAnimator alloc] initWithReferenceView:self.view];
     paddleDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:@[paddleView]];
     ballDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:@[ballView]];
-    blockDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:@[blockView]];
+    blockDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:unstruckBlocks];
     pushBehavior = [[UIPushBehavior alloc] initWithItems:@[ballView] mode:UIPushBehaviorModeInstantaneous];
-    collisionBehavior = [[UICollisionBehavior alloc] initWithItems:@[paddleView, ballView, blockView]];
+    
+    collisionBehavior = [[UICollisionBehavior alloc] initWithItems:unstruckBlocks];
     collisionBehavior.collisionDelegate = self;
+    [collisionBehavior addItem:paddleView];
+    [collisionBehavior addItem:ballView];
     
     paddleDynamicBehavior.allowsRotation = NO;
     paddleDynamicBehavior.density = 100000000;
     
     [dynamicAnimator addBehavior:paddleDynamicBehavior];
     
-    ballDynamicBehavior.allowsRotation = NO;
+    ballDynamicBehavior.allowsRotation = YES;
     ballDynamicBehavior.elasticity = 1.0;
     ballDynamicBehavior.friction = 0.0;
     ballDynamicBehavior.resistance = 0.0;
@@ -61,36 +77,51 @@
     
     [dynamicAnimator addBehavior:blockDynamicBehavior];
     
-    
-    pushBehavior.pushDirection = CGVectorMake(0.5, 0.9);
-    pushBehavior.active = YES;
+    pushBehavior.pushDirection = CGVectorMake(0.3, 0.9);
     pushBehavior.magnitude = 0.5;
     
+    pushBehavior.active = NO;
     [dynamicAnimator addBehavior:pushBehavior];
     
     collisionBehavior.collisionMode = UICollisionBehaviorModeEverything;
     collisionBehavior.translatesReferenceBoundsIntoBoundary = YES;
     
-    
     [dynamicAnimator addBehavior:collisionBehavior];
 }
 
--(void)restartTurn
+-(void)drawBlocks
 {
+    for (int x = 0; x < 6; x++) {
+        for (int y = 0 ; y < 6; y++) {
+            BlockView *tempBlockView = [[BlockView alloc] initWithFrame:CGRectMake( ((x * 40) + 40), ((y * 15) + 40), 40, 15)];
+            tempBlockView.backgroundColor = [UIColor blueColor];
+            tempBlockView.layer.borderColor = [UIColor blackColor].CGColor;
+            tempBlockView.layer.borderWidth = 1.0f;
+            [unstruckBlocks addObject:tempBlockView];
+            [self.view addSubview:tempBlockView];
+        }
+    }
+}
+
+-(void)restartLife
+{
+    gameHasBegun = NO;
     dynamicAnimator = [[UIDynamicAnimator alloc] initWithReferenceView:self.view];
     paddleDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:@[paddleView]];
     ballDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:@[ballView]];
-    blockDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:@[blockView]];
+    blockDynamicBehavior = [[UIDynamicItemBehavior alloc] initWithItems:unstruckBlocks];
     pushBehavior = [[UIPushBehavior alloc] initWithItems:@[ballView] mode:UIPushBehaviorModeInstantaneous];
-    collisionBehavior = [[UICollisionBehavior alloc] initWithItems:@[paddleView, ballView, blockView]];
+    collisionBehavior = [[UICollisionBehavior alloc] initWithItems:unstruckBlocks];
     collisionBehavior.collisionDelegate = self;
+    [collisionBehavior addItem:paddleView];
+    [collisionBehavior addItem:ballView];
     
     paddleDynamicBehavior.allowsRotation = NO;
     paddleDynamicBehavior.density = 100000000;
     
     [dynamicAnimator addBehavior:paddleDynamicBehavior];
     
-    ballDynamicBehavior.allowsRotation = NO;
+    ballDynamicBehavior.allowsRotation = YES;
     ballDynamicBehavior.elasticity = 1.0;
     ballDynamicBehavior.friction = 0.0;
     ballDynamicBehavior.resistance = 0.0;
@@ -105,9 +136,8 @@
     
     [dynamicAnimator addBehavior:blockDynamicBehavior];
     
-    
-    pushBehavior.pushDirection = CGVectorMake(0.5, 0.9);
-    pushBehavior.active = YES;
+    pushBehavior.pushDirection = CGVectorMake(0.3, 0.9);
+    pushBehavior.active = NO;
     pushBehavior.magnitude = 0.5;
     
     [dynamicAnimator addBehavior:pushBehavior];
@@ -117,27 +147,26 @@
     
     [dynamicAnimator addBehavior:collisionBehavior];
 }
-
-
 
 - (IBAction)dragPaddle:(UIPanGestureRecognizer *)panGestureRecognizer {
+    
+    if (gameHasBegun == NO) {
+        gameHasBegun = YES;
+        pushBehavior.active = YES;
+        [dynamicAnimator addBehavior:pushBehavior];
+    }
     
     paddleView.center = CGPointMake([panGestureRecognizer locationInView:self.view].x, paddleView.center.y);
     [dynamicAnimator updateItemUsingCurrentState:paddleView];
 
 }
 
-
-
 - (void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier atPoint:(CGPoint)p
 {
-
-    if (ballView.center.y > 540) {
-        NSLog(@"Center = %f", ballView.center.y);
+    if (p.y > 560) {
         ballView.center = self.view.center;
         [dynamicAnimator updateItemUsingCurrentState:ballView];
-        [self restartTurn];
-        
+        [self restartLife];
     }
 }
 
@@ -145,16 +174,16 @@
 {
     if ([item1 isKindOfClass:[BallView class]] && [item2 isKindOfClass:[BlockView class]]) {
         NSLog(@"Ball and Block Collided");
+        [[unstruckBlocks objectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]] removeFromSuperview];
+        [collisionBehavior removeItem:[unstruckBlocks objectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]]];
+        [unstruckBlocks removeObjectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]];
         
-        
-        [collisionBehavior removeItem:blockView];
     }
-}
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    if ([item1 isKindOfClass:[PaddleView class]] && [item2 isKindOfClass:[BallView class]]) {
+        NSLog(@"%f", [ballDynamicBehavior angularVelocityForItem:ballView]);
+    }
+    
 }
 
 @end

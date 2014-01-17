@@ -24,6 +24,7 @@
 		18931F2D1888700700417413 /* PaddleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 18931F2C1888700700417413 /* PaddleView.m */; };
 		18931F36188874D000417413 /* BallView.m in Sources */ = {isa = PBXBuildFile; fileRef = 18931F35188874D000417413 /* BallView.m */; };
 		18F182E5188884CE007122BE /* BlockView.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F182E4188884CE007122BE /* BlockView.m */; };
+		18F182E71888C024007122BE /* pongAssets in Resources */ = {isa = PBXBuildFile; fileRef = 18F182E61888C024007122BE /* pongAssets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,7 @@
 		18931F35188874D000417413 /* BallView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BallView.m; sourceTree = "<group>"; };
 		18F182E3188884CE007122BE /* BlockView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlockView.h; sourceTree = "<group>"; };
 		18F182E4188884CE007122BE /* BlockView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlockView.m; sourceTree = "<group>"; };
+		18F182E61888C024007122BE /* pongAssets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = pongAssets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 		18931EFD18886FE700417413 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				18F182E61888C024007122BE /* pongAssets */,
 				18931EFE18886FE700417413 /* Breakout-Info.plist */,
 				18931EFF18886FE700417413 /* InfoPlist.strings */,
 				18931F0218886FE700417413 /* main.m */,
@@ -244,6 +247,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				18931F0F18886FE700417413 /* Images.xcassets in Resources */,
+				18F182E71888C024007122BE /* pongAssets in Resources */,
 				18931F0118886FE700417413 /* InfoPlist.strings in Resources */,
 				18931F0A18886FE700417413 /* Main.storyboard in Resources */,
 			);

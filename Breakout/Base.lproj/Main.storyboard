@@ -17,7 +17,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4cP-bK-aka" customClass="PaddleView">
-                                <rect key="frame" x="80" y="495" width="98" height="29"/>
+                                <rect key="frame" x="80" y="495" width="104" height="24"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 <gestureRecognizers/>
@@ -26,12 +26,7 @@
                                 </connections>
                             </view>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aAR-x3-Z99" customClass="BallView">
-                                <rect key="frame" x="94" y="129" width="25" height="25"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                            </view>
-                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BjH-LD-7Au" customClass="BlockView">
-                                <rect key="frame" x="43" y="192" width="50" height="25"/>
+                                <rect key="frame" x="145" y="270" width="30" height="28"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                             </view>
@@ -40,7 +35,6 @@
                     </view>
                     <connections>
                         <outlet property="ballView" destination="aAR-x3-Z99" id="MDh-8j-bpZ"/>
-                        <outlet property="blockView" destination="BjH-LD-7Au" id="afP-B5-umn"/>
                         <outlet property="paddleView" destination="4cP-bK-aka" id="QqE-gD-k1k"/>
                     </connections>
                 </viewController>
