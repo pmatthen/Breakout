@@ -97,7 +97,7 @@
 -(void)drawBlocks
 {
     for (int x = 0; x < 6; x++) {
-        for (int y = 0 ; y < 1; y++) {
+        for (int y = 0 ; y < 6; y++) {
             BlockView *tempBlockView = [[BlockView alloc] initWithFrame:CGRectMake( ((x * 40) + 40), ((y * 15) + 40), 40, 15)];
             tempBlockView.backgroundColor = [UIColor blueColor];
             tempBlockView.layer.borderColor = [UIColor blackColor].CGColor;
@@ -186,22 +186,24 @@
     {
         NSLog(@"Ball and Block Collided");
         
-        // Grabs the exact item (at the same memory address) colliding with the ball from the UnstruckBlocks array and removes it from the super view
         [[unstruckBlocks objectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]] removeFromSuperview];
-        
-        // Grabs the exact item (at the same memory address) colliding with the ball and removes it from collisionBehavior
         [collisionBehavior removeItem:[unstruckBlocks objectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]]];
-        
-        // Grabs the exact item (at the same memory address) colliding with the ball and removes it from the unstruckBlocks array
         [unstruckBlocks removeObjectAtIndex:[unstruckBlocks indexOfObjectIdenticalTo:item2]];
-        
-        // Check to see if unstruckBlocks is empty. If so, call method shouldStartAgain
         [self shouldStartAgain:unstruckBlocks];
     }
 
     if ([item1 isKindOfClass:[PaddleView class]] && [item2 isKindOfClass:[BallView class]])
     {
-        NSLog(@"%f", [ballDynamicBehavior angularVelocityForItem:ballView]);
+        NSLog(@"(%f, %f)", [ballDynamicBehavior linearVelocityForItem:ballView].x, [ballDynamicBehavior linearVelocityForItem:ballView].y);
+        NSLog(@"Point: (%f, %f)", p.x, p.y);
+        NSLog(@"Paddle: (%f, %f)",paddleView.frame.origin.x, paddleView.frame.origin.y);
+        
+        float linearVelocityX = [ballDynamicBehavior linearVelocityForItem:ballView].x;
+        float whereOnPaddlePercent = (p.x - paddleView.frame.origin.x - (paddleView.frame.size.width / 2)) / (paddleView.frame.size.width / 2);
+        
+        linearVelocityX = linearVelocityX * whereOnPaddlePercent * 2;
+        [ballDynamicBehavior addLinearVelocity:CGPointMake(linearVelocityX, 0) forItem:ballView];
+        
     }
 }
 
